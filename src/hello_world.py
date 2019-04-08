@@ -5,13 +5,9 @@ import dash_html_components as html
 import numpy as np 
 import plotly.graph_objs as go
 
-
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server)
 
-np.random.seed(101)
-random_x = np.random.randint(1,21,20)
-random_y = np.random.randint(1,21,20)
 consumption_x = np.arange(24)
 consumption_y = np.array([2,1,1,0,0,0,1,4,4,3,3,7,8,5,3,2,1,2,6,6,3,3,2,2])*2
 production_x = np.arange(24)
