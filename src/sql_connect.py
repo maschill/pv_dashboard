@@ -6,7 +6,6 @@ if __name__ == '__main__':
     connection = None
     with open('db_config.txt', 'r') as fo:
         connection = fo.read().strip()
-    print(connection)
-    # engine = create_engine(connection)
-    # for row in engine.execute('SELECT * FROM wechselrichter'):
-        # print(row)
+    engine = create_engine(connection)
+    for row in engine.execute('SELECT * FROM wechselrichter'):
+        print(row)
