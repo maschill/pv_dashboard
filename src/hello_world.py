@@ -88,7 +88,7 @@ def update_graph(n):
     query = "SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE uhrzeit < STR_TO_DATE('" 
     base_time = datetime(2019,4,8,6,0,0)
     time_gone = datetime.now()- datetime(2019,4,10,1,30,30)
-    time_threshold = base_time+(time_gone%timedelta(minutes=3600))*60
+    time_threshold = base_time+(time_gone%timedelta(minutes=18))*60
     print(time_threshold)
     query = query + time_threshold.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T');" 
     
