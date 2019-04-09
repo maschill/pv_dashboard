@@ -2,6 +2,7 @@ import dash
 from flask import Flask
 import dash_core_components as doc
 import dash_html_components as html
+import dash_table
 import numpy as np 
 import plotly.graph_objs as go
 
@@ -14,33 +15,43 @@ production_x = np.arange(24)
 production_y = np.array([0,0,0,0,0,0,0,0.9,3.5,7.4,12.3,16.4,18.6,19.2,18.4,15.8,11.7,6.7,2.3,0.2,0,0,0,0])
 assert(len(consumption_x)==len(consumption_y))
 assert(len(production_x)==len(production_y))
+days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+food = ["Nudeln mit Soße", "Eintopf mit Röstlbrot", "Käsesuppe", 'Lasagne', 'Apfelküchle', 'Grillfisch', 'NIX!!!!']
 
 app.layout=html.Div(children=[
   
-    doc.Graph(
-        id='scatter',
-        figure={
-            'data': [
-                go.Scatter(
-                    x=consumption_x,
-                    y=consumption_y,
-                    fill='tozeroy',
-                    name='Verbrauch'
-                ),
-                go.Scatter(
-                    x=production_x,
-                    y=production_y,
-                    fill='tonexty',
-                    name='PV Erzeugung'
-                ),
-            ],
-            'layout': go.Layout(
-                title = 'Dummy Verbrauch-Erzeugungs-Plot',
-                xaxis = {'title': 'Uhrzeit'},
-                yaxis = {'title': 'kW'}
+        doc.Graph(
+            id='scatter',
+            figure={
+                'data': [
+                    go.Scatter(
+                        x=consumption_x,
+                        y=consumption_y,
+                        fill='tozeroy',
+                        name='Verbrauch'
+                    ),
+                    go.Scatter(
+                        x=production_x,
+                        y=production_y,
+                        fill='tonexty',
+                        name='PV Erzeugung'
+                    ),
+                ],
+                'layout': go.Layout(
+                    title = 'Dummy Verbrauch-Erzeugungs-Plot',
+                    xaxis = {'title': 'Uhrzeit'},
+                    yaxis = {'title': 'kW'}
+                )
+            }
+        ),
+        html.Div(children=[
+            dash_table.DataTable(
+                id = "essen",
+                columns = [{"name":i, "id":i} for i in days],
+                data = [{k:v for k,v in zip(days,food)}]
             )
-        }
-    )
+        ])
+
     ])
 
 
