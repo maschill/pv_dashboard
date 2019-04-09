@@ -6,6 +6,7 @@ import dash_table
 import numpy as np 
 import plotly.graph_objs as go
 from db_schemes import Messdaten
+from sqlalchemy import create_engine
 
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server)
@@ -18,6 +19,17 @@ assert(len(consumption_x)==len(consumption_y))
 assert(len(production_x)==len(production_y))
 days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 food = ["Nudeln mit Soße", "Eintopf mit Röstlbrot", "Käsesuppe", 'Lasagne', 'Apfelküchle', 'Grillfisch', 'NIX!!!!']
+
+#read db config from db_config.txt
+connection = None
+with open('pv_dashboard/src/db_config.txt', 'r') as fo:
+    connection = fo.read().strip()
+
+engine = create_engine(connection)
+data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten GROUP BY uhrzeit')]
+t = [d[0] for d in data]
+p = [max(d[1],0) for d in data]
+
 
 app.layout=html.Div(children=[
   
@@ -51,20 +63,28 @@ app.layout=html.Div(children=[
                 columns = [{"name":i, "id":i} for i in days],
                 data = [{k:v for k,v in zip(days,food)}]
             )
-        ])
+        ]),
+        doc.Graph(
+            id = "scatter2",
+            figure= {
+                "data": [go.Scatter(
+                    x = t,
+                    y = p,
+                    name = "production"
+                )],
+                'layout': go.Layout(
+                    title = 'Dummy Verbrauch-Erzeugungs-Plot',
+                    xaxis = {'title': 'Uhrzeit'},
+                    yaxis = {'title': 'kW'}
+                )
+            }
+        )
 
     ])
 
 
 
 if __name__=="__main__":
-    #read db config from db_config.txt
-    connection = None
-    with open('db_config.txt', 'r') as fo:
-        connection = fo.read().strip()
-    engine = create_engine(connection)
-
-
 
 
 
