@@ -2,7 +2,7 @@
 Dashboard for photovoltaik using Dash
 
 ## Installation
-with anaconda: 
+with anaconda:    
 0. create file with database connection as used by sqlalchemy: src/db_config.txt
 1. conda env create -f environment.yml
 2.   a) source activate pv_vis on linux
