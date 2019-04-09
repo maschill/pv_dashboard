@@ -5,6 +5,7 @@ import dash_html_components as html
 import dash_table
 import numpy as np 
 import plotly.graph_objs as go
+from db_schemes import Messdaten
 
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server)
@@ -57,4 +58,14 @@ app.layout=html.Div(children=[
 
 
 if __name__=="__main__":
+    #read db config from db_config.txt
+    connection = None
+    with open('db_config.txt', 'r') as fo:
+        connection = fo.read().strip()
+    engine = create_engine(connection)
+
+
+
+
+
     app.run_server(port=1337)
