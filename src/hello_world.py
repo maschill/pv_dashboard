@@ -7,6 +7,9 @@ import numpy as np
 import plotly.graph_objs as go
 from db_schemes import Messdaten
 from sqlalchemy import create_engine
+from datetime import datetime, timedelta
+from dash.dependencies import Output, Input
+
 
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server)
@@ -65,27 +68,47 @@ app.layout=html.Div(children=[
             )
         ]),
         doc.Graph(
-            id = "scatter2",
-            figure= {
-                "data": [go.Scatter(
-                    x = t,
-                    y = p,
-                    name = "production"
-                )],
-                'layout': go.Layout(
-                    title = 'Dummy Verbrauch-Erzeugungs-Plot',
-                    xaxis = {'title': 'Uhrzeit'},
-                    yaxis = {'title': 'kW'}
-                )
-            }
+            id = "updated_graph"),
+        doc.Interval(
+            id = 'graph_update',
+            interval = 1*5000,
+            n_intervals = 0
         )
-
     ])
 
+@app.callback(Output('updated_graph', 'figure'), 
+            [Input('graph_update', 'n_intervals')])
+def update_graph(n):
+    #read db config from db_config.txt
+    connection = None
+    with open('pv_dashboard/src/db_config.txt', 'r') as fo:
+        connection = fo.read().strip()
 
+    engine = create_engine(connection)
+    query = "SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE uhrzeit < STR_TO_DATE('" 
+    base_time = datetime(2019,4,8,6,0,0)
+    time_gone = datetime.now()- datetime(2019,4,10,1,30,30)
+    time_threshold = base_time+(time_gone%timedelta(minutes=3600))*60
+    print(time_threshold)
+    query = query + time_threshold.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T');" 
+    
+    data = [[x,y] for x,y in engine.execute(query)]
+    t = [d[0] for d in data]
+    p = [max(d[1],0) for d in data]
+
+    data = [go.Scatter(
+        x = t,
+        y = p,
+        name = "production"
+    )]
+
+    layout = go.Layout(
+        title = 'Selbst Aktualisierender Plot',
+        xaxis = {'title': 'Uhrzeit'},
+        yaxis = {'title': 'Watt'}
+    )
+
+    return {"data":data , "layout": layout}
 
 if __name__=="__main__":
-
-
-
     app.run_server(port=1337)
