@@ -34,7 +34,7 @@ data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung F
 t = [d[0] for d in data]
 p = [max(d[1],0) for d in data]
 
-
+app.title = "Photovoltaik Dashboard"
 app.layout=html.Div(children=[
   
         doc.Graph(
