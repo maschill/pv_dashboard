@@ -6,7 +6,7 @@ import dash_table
 import numpy as np 
 import plotly.graph_objs as go
 from db_schemes import Messdaten
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func, desc
 from datetime import datetime, timedelta
 from dash.dependencies import Output, Input
 from sqlalchemy.orm import Session
@@ -22,7 +22,7 @@ production_y = np.array([0,0,0,0,0,0,0,0.9,3.5,7.4,12.3,16.4,18.6,19.2,18.4,15.8
 assert(len(consumption_x)==len(consumption_y))
 assert(len(production_x)==len(production_y))
 days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-food = ["Nudeln mit Soße", "Eintopf mit Röstlbrot", "Käsesuppe", 'Lasagne', 'Apfelküchle', 'Grillfisch', 'NIX!!!!']
+food = ["--OSTERMONTAG--", "Rili's Tagessuppe", "Reis mit Bohnen", 'Pizza', 'Linseneintopf', 'Schaschlik am Spieß', 'Geburtstagskuchen']
 
 #read db config from db_config.txt
 connection = None
@@ -30,7 +30,7 @@ with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten GROUP BY uhrzeit')]
+data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten GROUP BY uhrzeit')]
 t = [d[0] for d in data]
 p = [max(d[1],0) for d in data]
 
@@ -72,7 +72,7 @@ app.layout=html.Div(children=[
             id = "updated_graph"),
         doc.Interval(
             id = 'graph_update',
-            interval = 1*5000,
+            interval = 1*15000,
             n_intervals = 0
         )
     ])
@@ -87,19 +87,13 @@ def update_graph(n):
 
     engine = create_engine(connection)
     sess = Session(bind=engine)
-
-    # query = "SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE uhrzeit < STR_TO_DATE('" 
-    base_time = datetime(2019,4,8,6,0,0)
-    time_gone = datetime.now()- datetime(2019,4,20,1,30,30)
-    time_threshold = base_time+(time_gone%timedelta(minutes=18))*60
-    print(time_threshold)
-    # query = query + time_threshold.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T');" 
+    time_threshold = datetime.now() - timedelta(days=3) 
     
-    q = sess.query(Messdaten.uhrzeit, Messdaten.wechselstrom_leistung).filter(Messdaten.uhrzeit < time_threshold)
+    q = sess.query(func.date_trunc("hour",Messdaten.uhrzeit), func.avg(Messdaten.wechselstrom_leistung)).filter(Messdaten.uhrzeit > time_threshold).group_by(func.date_trunc('hour', Messdaten.uhrzeit)).order_by(desc(func.date_trunc("hour",Messdaten.uhrzeit)))
 
-    data = [[x,y] for x,y in q.all()]
-    t = [d[0] for d in data]
-    p = [max(d[1],0) for d in data]
+    res = [[x,y] for x,y in q.all()]
+    t = [d[0] for d in res]
+    p = [float(d[1]) for d in res]
 
     data = [go.Scatter(
         x = t,
@@ -116,4 +110,4 @@ def update_graph(n):
     return {"data":data , "layout": layout}
 
 if __name__=="__main__":
-    app.run_server(port=1337)
+    app.run_server(port=1337, host="0.0.0.0")
