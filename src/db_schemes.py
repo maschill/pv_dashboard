@@ -51,6 +51,7 @@ class Messdaten(Base):
     wechselstrom_strom = Column(Float)
     wechselstrom_leistung = Column(Integer)
     temperatur_wechselrichter = Column(Integer)
+    insert_timestamp = Column(DateTime)
 
     def __init__(self, 
                  wechselrichter_id,
@@ -63,7 +64,8 @@ class Messdaten(Base):
                  wechselstrom_spannung,
                  wechselstrom_strom,
                  wechselstrom_leistung,
-                 temperatur_wechselrichter):
+                 temperatur_wechselrichter,
+                 insert_timestamp):
         self.wechselrichter_id = wechselrichter_id
         self.uhrzeit = uhrzeit
         self.betriebszeit = betriebszeit
@@ -75,3 +77,4 @@ class Messdaten(Base):
         self.wechselstrom_strom = wechselstrom_strom
         self.wechselstrom_leistung = wechselstrom_leistung
         self.temperatur_wechselrichter = temperatur_wechselrichter
+        self.insert_timestamp = insert_timestamp

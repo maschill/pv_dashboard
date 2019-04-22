@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     #read db config from db_config.txt
     connection = None
-    with open('db_config.txt', 'r') as fo:
+    with open('src/db_config.txt', 'r') as fo:
         connection = fo.read().strip()
         
     engine = create_engine(connection)
