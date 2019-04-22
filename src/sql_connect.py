@@ -7,5 +7,5 @@ if __name__ == '__main__':
     with open('src/db_config.txt', 'r') as fo:
         connection = fo.read().strip()
     engine = create_engine(connection)
-    for row in engine.execute('SELECT min(uhrzeit), wechselstrom_leistung FROM messdaten WHERE wechselstrom_leistung > 5000 '):
+    for row in engine.execute('SELECT * FROM wechselrichter;'): 
         print(row)

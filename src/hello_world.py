@@ -26,7 +26,7 @@ food = ["Nudeln mit Soße", "Eintopf mit Röstlbrot", "Käsesuppe", 'Lasagne', '
 
 #read db config from db_config.txt
 connection = None
-with open('pv_dashboard/src/db_config.txt', 'r') as fo:
+with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
@@ -82,7 +82,7 @@ app.layout=html.Div(children=[
 def update_graph(n):
     #read db config from db_config.txt
     connection = None
-    with open('pv_dashboard/src/db_config.txt', 'r') as fo:
+    with open('src/db_config.txt', 'r') as fo:
         connection = fo.read().strip()
 
     engine = create_engine(connection)
@@ -90,7 +90,7 @@ def update_graph(n):
 
     # query = "SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE uhrzeit < STR_TO_DATE('" 
     base_time = datetime(2019,4,8,6,0,0)
-    time_gone = datetime.now()- datetime(2019,4,10,1,30,30)
+    time_gone = datetime.now()- datetime(2019,4,20,1,30,30)
     time_threshold = base_time+(time_gone%timedelta(minutes=18))*60
     print(time_threshold)
     # query = query + time_threshold.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T');" 

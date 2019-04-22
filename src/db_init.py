@@ -3,7 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from db_schemes import Standort, Betriebsart, Wechselrichter, Messdaten
 
-Base = declarative_base()
+#Base = declarative_base()
+from db_schemes import Base
 
 if __name__ == "__main__":
     standorte = [
@@ -51,8 +52,9 @@ if __name__ == "__main__":
     connection = None
     with open('src/db_config.txt', 'r') as fo:
         connection = fo.read().strip()
+        print(connection)
         
-    engine = create_engine(connection)
+    engine = create_engine(connection, echo=True)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     print("created tables")

@@ -1,0 +1,9 @@
+  flask==1.0.2
+  numpy==1.15.2
+  dash==0.40
+  dash-core-components
+  dash-html-components
+  dash-renderer
+  sqlalchemy
+  psycopg2
+  plotly==3.7.0
