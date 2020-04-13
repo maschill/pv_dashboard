@@ -16,7 +16,7 @@ server = Flask(__name__)
 app = dash.Dash(__name__, server=server)
 
 consumption_x = np.arange(24)
-consumption_y = np.array([2,1,1,0,0,0,1,4,4,3,3,7,8,5,3,2,1,2,6,6,3,3,2,2])*2
+consumption_y = np.array([2,1,1,0,0,0,1,4,4,3,3,7,8,5,3,2,1,2,6,6,3,3,2,2])*4
 production_x = np.arange(24)
 production_y = np.array([0,0,0,0,0,0,0,0.9,3.5,7.4,12.3,16.4,18.6,19.2,18.4,15.8,11.7,6.7,2.3,0.2,0,0,0,0])
 assert(len(consumption_x)==len(consumption_y))
@@ -36,20 +36,19 @@ p = [max(d[1],0) for d in data]
 
 app.title = 'Photovoltaik Dashboard'
 app.layout=html.Div(children=[
-  
         doc.Graph(
             id='scatter',
             figure={
                 'data': [
                     go.Scatter(
-                        x=consumption_x,
+                        x=t
                         y=consumption_y,
                         fill='tozeroy',
-                        name='Verbrauch'
+                        name='Verbrauch Beispiel'
                     ),
                     go.Scatter(
-                        x=production_x,
-                        y=production_y,
+                        x=t,
+                        y=p,
                         fill='tonexty',
                         name='PV Erzeugung'
                     ),
@@ -57,7 +56,7 @@ app.layout=html.Div(children=[
                 'layout': go.Layout(
                     title = 'Dummy Verbrauch-Erzeugungs-Plot',
                     xaxis = {'title': 'Uhrzeit'},
-                    yaxis = {'title': 'kW'}
+                    yaxis = {'title': 'kWh'}
                 )
             }
         ),
@@ -86,13 +85,11 @@ def update_graph(n):
         connection = fo.read().strip()
 
     engine = create_engine(connection)
-    query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit < STR_TO_DATE('" 
-    base_time = datetime(2019,4,8,6,0,0)
-    time_gone = datetime.now()- datetime(2019,4,10,1,30,30)
-    time_threshold = base_time+(time_gone%timedelta(minutes=18))*60
-    
-    query = query + time_threshold.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T') GROUP BY uhrzeit;" 
+    query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit > STR_TO_DATE('" 
+    base_time = datetime.now() - timedelta(2,0,0,0,0,0)
+    query = query + base_time.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T') GROUP BY uhrzeit;" 
     print(query)
+
     data = [[x,y] for x,y in engine.execute(query)]
     t = [d[0] for d in data]
     p = [max(d[1],0) for d in data]
