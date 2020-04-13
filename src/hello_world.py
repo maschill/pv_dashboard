@@ -22,7 +22,7 @@ production_y = np.array([0,0,0,0,0,0,0,0.9,3.5,7.4,12.3,16.4,18.6,19.2,18.4,15.8
 assert(len(consumption_x)==len(consumption_y))
 assert(len(production_x)==len(production_y))
 days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-food = ["--OSTERMONTAG--", "Rili's Tagessuppe", "Reis mit Bohnen", 'Pizza', 'Linseneintopf', 'Schaschlik am Spieß', 'Geburtstagskuchen']
+food = ["Spargel-Eiersalat", "Pizza", "Nudelsalat", 'Ofengemüse', 'Uhl Bestellen', 'Reissalat', 'Bananenbrot']
 
 #read db config from db_config.txt
 connection = None
@@ -30,11 +30,11 @@ with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten GROUP BY uhrzeit')]
+data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4')]
 t = [d[0] for d in data]
 p = [max(d[1],0) for d in data]
 
-app.title = "Photovoltaik Dashboard"
+app.title = 'Photovoltaik Dashboard'
 app.layout=html.Div(children=[
   
         doc.Graph(
@@ -106,7 +106,7 @@ def update_graph(n):
     layout = go.Layout(
         title = 'Selbst Aktualisierender Plot',
         xaxis = {'title': 'Uhrzeit'},
-        yaxis = {'title': 'Watt', "range":[0,80000]}
+        yaxis = {'title': 'Watt', "range":[0,80]}
     )
 
     return {"data":data , "layout": layout}
