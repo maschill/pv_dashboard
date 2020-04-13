@@ -39,9 +39,10 @@ if __name__ == '__main__':
 
     wid = 4
     messdaten = []
+    insert_time = datetime.now()
     for a, ind, ts, val in arr[1:]:
         t = datetime.fromtimestamp(ts)
-        messdaten.append(Messdaten(wid, t, timedelta(0,60,0), 0, gu, gi, gp, wu, wi, val/100, 30))
+        messdaten.append(Messdaten(wid, t, timedelta(0,60,0), 0, gu, gi, gp, wu, wi, val/100, 30, insert_time))
 
     engine.execute("DELETE FROM messdaten;")    
     session = Session(bind=engine)
