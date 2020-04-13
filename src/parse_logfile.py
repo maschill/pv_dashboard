@@ -13,7 +13,7 @@ if __name__ == '__main__':
     wv = 300
     gv, gs, gp = 0,0,0
 
-    if len sys.argv < 2:
+    if len(sys.argv) < 2:
         print("usage: python parse_logfile.py <filename>")
         exit(0)
 
