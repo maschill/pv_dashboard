@@ -9,14 +9,15 @@ from datetime import datetime
 from db_schemes import Messdaten
 
 if __name__ == '__main__':
-    #fix some values
-    wv = 300
-    gv, gs, gp = 0,0,0
-
     if len(sys.argv) < 2:
         print("usage: python parse_logfile.py <filename>")
         exit(0)
-
+    
+    #fix some values
+    wv = 300
+    gu, gi, gp = 0,0,0
+    wi, wu = 0,0
+    
     filename = sys.argv[1]
 
     dt = np.dtype([
