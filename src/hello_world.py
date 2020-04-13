@@ -30,7 +30,7 @@ with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten GROUP BY uhrzeit')]
+data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten GROUP BY uhrzeit')]
 t = [d[0] for d in data]
 p = [max(d[1],0) for d in data]
 
@@ -86,14 +86,16 @@ def update_graph(n):
         connection = fo.read().strip()
 
     engine = create_engine(connection)
-    sess = Session(bind=engine)
-    time_threshold = datetime.now() - timedelta(days=3) 
+    query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit < STR_TO_DATE('" 
+    base_time = datetime(2019,4,8,6,0,0)
+    time_gone = datetime.now()- datetime(2019,4,10,1,30,30)
+    time_threshold = base_time+(time_gone%timedelta(minutes=18))*60
     
-    q = sess.query(func.date_trunc("hour",Messdaten.uhrzeit), func.avg(Messdaten.wechselstrom_leistung)).filter(Messdaten.uhrzeit > time_threshold).group_by(func.date_trunc('hour', Messdaten.uhrzeit)).order_by(desc(func.date_trunc("hour",Messdaten.uhrzeit)))
-
-    res = [[x,y] for x,y in q.all()]
-    t = [d[0] for d in res]
-    p = [float(d[1]) for d in res]
+    query = query + time_threshold.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T') GROUP BY uhrzeit;" 
+    print(query)
+    data = [[x,y] for x,y in engine.execute(query)]
+    t = [d[0] for d in data]
+    p = [max(d[1],0) for d in data]
 
     data = [go.Scatter(
         x = t,
@@ -104,7 +106,7 @@ def update_graph(n):
     layout = go.Layout(
         title = 'Selbst Aktualisierender Plot',
         xaxis = {'title': 'Uhrzeit'},
-        yaxis = {'title': 'Watt'}
+        yaxis = {'title': 'Watt', "range":[0,80000]}
     )
 
     return {"data":data , "layout": layout}

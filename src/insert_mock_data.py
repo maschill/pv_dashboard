@@ -23,15 +23,16 @@ if __name__ == '__main__':
     wechselrichter = {k:v for k,v in zip(range(8), [8000,8000,8000,5000,25000,4000,4000,4000])}
     uhrzeit = datetime(2019,4,8,0,0,0)
     messdaten = []
+    print(max(wp), np.argmax(wp))
     for i in range(1440):
         t = uhrzeit+timedelta(0,60*i)
-        if i < 6*60 or i > 20*60: 
+        if i < 6*60 or i >= 20*60: 
             wpi = 0
         else: 
-            wpi = int(wp[i-20*60]*1000)
+            wpi = int(wp[i-6*60]*3000)
         for wid, mpower in wechselrichter.items():
             ws = (wpi*(mpower/66000))/wv
-            messdaten.append(Messdaten(wid, t, timedelta(0,60,0),0, gv, gs, gp, wv, ws, wpi, 30))
+            messdaten.append(Messdaten(wid, t, timedelta(0,60,0),0, gv, gs, gp, wv, ws, int(wpi*(mpower/66000)), 30))
 
 
     engine.execute("DELETE FROM messdaten;")    
