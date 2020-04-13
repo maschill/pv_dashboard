@@ -1,3 +1,4 @@
+#encoding: utf-8
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -9,7 +10,7 @@ from db_schemes import Base
 if __name__ == "__main__":
     standorte = [
         Standort(0, "huehnerstall"),
-        Standort(1, "heuhalle")
+        Standort(1, "heuhalle"),
     ]
 
     wechselrichter = [
@@ -17,10 +18,10 @@ if __name__ == "__main__":
         Wechselrichter(1, 0,8000),
         Wechselrichter(2, 0,8000),
         Wechselrichter(3, 0,5000),
-        Wechselrichter(4, 1, 25000),
-        Wechselrichter(5, 1, 4000),
-        Wechselrichter(6, 1, 4000),
-        Wechselrichter(7, 1, 4000)
+        Wechselrichter(4, 1, 36000),
+        # Wechselrichter(5, 1, 4000),
+        # Wechselrichter(6, 1, 4000),
+        # Wechselrichter(7, 1, 4000)
     ]
 
     betriebsart = [
@@ -58,8 +59,9 @@ if __name__ == "__main__":
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     print("created tables")
-
+    
     session = Session(bind=engine)
+    engine.commit() 
     print("created session")
     session.add_all(standorte)
     session.commit()
