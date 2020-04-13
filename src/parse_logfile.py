@@ -31,7 +31,7 @@ if __name__ == '__main__':
         arr = np.fromfile(fo, dtype=dt, count=-1, sep='')
 
     connection = None
-    with open('pv_dashboard/src/db_config.txt', 'r') as fo:
+    with open('src/db_config.txt', 'r') as fo:
         connection = fo.read().strip()
     
     engine = create_engine(connection)
