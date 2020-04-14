@@ -1,3 +1,4 @@
+#encoding: utf-8
 import dash
 from flask import Flask
 import dash_core_components as doc
@@ -33,6 +34,7 @@ engine = create_engine(connection)
 data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4')]
 t = [d[0] for d in data]
 p = [max(d[1],0) for d in data]
+consumption_y = [xx for xx in consumption_y] + [0]*(len(p)-24)
 
 app.title = 'Photovoltaik Dashboard'
 app.layout=html.Div(children=[
@@ -41,7 +43,7 @@ app.layout=html.Div(children=[
             figure={
                 'data': [
                     go.Scatter(
-                        x=t
+                        x=t,
                         y=consumption_y,
                         fill='tozeroy',
                         name='Verbrauch Beispiel'
@@ -85,9 +87,9 @@ def update_graph(n):
         connection = fo.read().strip()
 
     engine = create_engine(connection)
-    query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit > STR_TO_DATE('" 
+    query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit >= TO_TIMESTAMP('" 
     base_time = datetime.now() - timedelta(2,0,0,0,0,0)
-    query = query + base_time.strftime("%Y-%m-%d %H:%M:%S") + "', '%%Y-%%m-%%d %%T') GROUP BY uhrzeit;" 
+    query = query + base_time.strftime("%Y-%m-%d %H:%M:%S") + "', 'YYYY-MM-DD HH24:MI:SS') GROUP BY uhrzeit ORDER BY uhrzeit;" 
     print(query)
 
     data = [[x,y] for x,y in engine.execute(query)]
@@ -103,7 +105,7 @@ def update_graph(n):
     layout = go.Layout(
         title = 'Selbst Aktualisierender Plot',
         xaxis = {'title': 'Uhrzeit'},
-        yaxis = {'title': 'Watt', "range":[0,80]}
+        yaxis = {'title': 'kWh', "range":[0,40]}
     )
 
     return {"data":data , "layout": layout}
