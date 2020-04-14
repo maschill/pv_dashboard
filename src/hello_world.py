@@ -33,7 +33,7 @@ with open('src/db_config.txt', 'r') as fo:
 engine = create_engine(connection)
 data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4')]
 t = [d[0] for d in data]
-p = [max(d[1],0) for d in data]
+p = [max(d[1]/100.0,0) for d in data]
 consumption_y = [xx for xx in consumption_y] + [0]*(len(p)-24)
 
 app.title = 'Photovoltaik Dashboard'
@@ -58,7 +58,7 @@ app.layout=html.Div(children=[
                 'layout': go.Layout(
                     title = 'Dummy Verbrauch-Erzeugungs-Plot',
                     xaxis = {'title': 'Uhrzeit'},
-                    yaxis = {'title': 'kWh'}
+                    yaxis = {'title': 'kWh', 'range':[0,40]}
                 )
             }
         ),
@@ -73,7 +73,7 @@ app.layout=html.Div(children=[
             id = "updated_graph"),
         doc.Interval(
             id = 'graph_update',
-            interval = 1*15000,
+            interval = 1*150000,
             n_intervals = 0
         )
     ])
@@ -94,7 +94,7 @@ def update_graph(n):
 
     data = [[x,y] for x,y in engine.execute(query)]
     t = [d[0] for d in data]
-    p = [max(d[1],0) for d in data]
+    p = [max(d[1]/100.0,0) for d in data]
 
     data = [go.Scatter(
         x = t,
