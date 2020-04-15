@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import sys
+import os
 
 from tabulate import tabulate
 
@@ -50,8 +51,8 @@ if __name__ == '__main__':
         print(tabulate(table, ["date/time", "b", "type", "value"], tablefmt="grid"))
         sys.exit(0)
 
-    connection = None
-    with open('src/db_config.txt', 'r') as fo:
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(script_dir, 'db_config.txt'), 'r') as fo:
         connection = fo.read().strip()
     
     engine = create_engine(connection)
