@@ -15,7 +15,7 @@ from db_schemes import Messdaten
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="parse pv logfiles and write them to db")
     parser.add_argument("filename", metavar="filename", type=str, help="logfile that is parsed")
-    parser.add_argument("-d", "--delete-old",dest="delete", action="store_true", help="delete all old records and write everything from the logfile to the db")
+    parser.add_argument("-d", "--delete-old", dest="delete", action="store_true", help="delete all old records and write everything from the logfile to the db")
     parser.add_argument("-p", "--print-only", action="store_true", help="print parsed data instead of storing to DB")
 
     args = parser.parse_args()
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         last_timestamp = 0
     else:
         last_timestamp = [t[0] for t in engine.execute("SELECT MAX(uhrzeit) FROM messdaten;")][0].timestamp()
-        print("inserting newer than ",last_timestamp)
+        print("inserting newer than ", last_timestamp)
 
     wid = 4
     messdaten = []
