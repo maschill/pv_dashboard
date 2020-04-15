@@ -54,9 +54,9 @@ if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(script_dir, 'db_config.txt'), 'r') as fo:
         connection = fo.read().strip()
-    
+
     engine = create_engine(connection)
-    
+
     if args.delete:
         last_timestamp = 0
     else:
@@ -67,13 +67,13 @@ if __name__ == '__main__':
     messdaten = []
     insert_time = datetime.now()
     for _a, _b, ind, ts, val in arr[1:]:
-        if args.delete or ts > last_timestamp:
+        if args.delete or ts > last_timestamp and ind == 6:
             t = datetime.fromtimestamp(ts)
             messdaten.append(Messdaten(wid, t, timedelta(0,60,0), 0, gu, gi, gp, wu, wi, int(val), 30, insert_time))
-    
+
     if args.delete:
         engine.execute("DELETE FROM messdaten;")    
-    
+
     session = Session(bind=engine)
     print("created session")
     session.add_all(messdaten)
