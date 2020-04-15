@@ -87,9 +87,18 @@ def update_graph(n):
         connection = fo.read().strip()
 
     engine = create_engine(connection)
-    query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit >= TO_TIMESTAMP('" 
-    base_time = datetime.now() - timedelta(2,0,0,0,0,0)
-    query = query + base_time.strftime("%Y-%m-%d %H:%M:%S") + "', 'YYYY-MM-DD HH24:MI:SS') GROUP BY uhrzeit ORDER BY uhrzeit;" 
+    query = """
+        SELECT
+            uhrzeit, SUM(wechselstrom_leistung)
+        FROM
+            messdaten
+        WHERE
+            uhrzeit >= (now() - interval '2 days')
+        GROUP BY
+            uhrzeit
+        ORDER BY
+            uhrzeit;
+    """
     print(query)
 
     data = [[x,y] for x,y in engine.execute(query)]
