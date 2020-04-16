@@ -31,7 +31,7 @@ with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4')]
+data = [[x,y] for x,y in engine.execute("""SELECT uhrzeit AT TIME ZONE 'Europe/Berlin', wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4;""")]
 t = [d[0] for d in data]
 p = [max(d[1]/100.0,0) for d in data]
 consumption_y = [xx for xx in consumption_y] + [0]*(len(p)-24)
@@ -89,7 +89,7 @@ def update_graph(n):
     engine = create_engine(connection)
     query = """
         SELECT
-            uhrzeit, SUM(wechselstrom_leistung)
+            uhrzeit AT TIME ZONE 'Europe/Berlin', SUM(wechselstrom_leistung)
         FROM
             messdaten
         WHERE

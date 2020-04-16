@@ -41,7 +41,7 @@ class Messdaten(Base):
     __tablename__= "messdaten"
 
     wechselrichter_id = Column(Integer, ForeignKey("wechselrichter.wechselrichter_id"), primary_key=True)
-    uhrzeit = Column(DateTime, primary_key=True)
+    uhrzeit = Column(DateTime(timezone=True), primary_key=True)
     betriebszeit = Column(Interval)
     status = Column(Integer, ForeignKey("betriebsart.status"))
     gleichstrom_spannung =  Column(Float)
@@ -51,7 +51,7 @@ class Messdaten(Base):
     wechselstrom_strom = Column(Float)
     wechselstrom_leistung = Column(Integer)
     temperatur_wechselrichter = Column(Integer)
-    insert_timestamp = Column(DateTime)
+    insert_timestamp = Column(DateTime(timezone=True))
 
     def __init__(self, 
                  wechselrichter_id,

@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import argparse
 import sys
 import os
+import pytz
 
 from tabulate import tabulate
 
@@ -58,17 +61,17 @@ if __name__ == '__main__':
     engine = create_engine(connection)
 
     if args.delete:
-        last_timestamp = 0
+        last_inserted = datetime.utcfromtimestamp(0)
     else:
-        last_timestamp = [t[0] for t in engine.execute("SELECT MAX(uhrzeit) FROM messdaten;")][0].timestamp()
-        print("inserting newer than ", last_timestamp)
+        last_inserted = [t[0] for t in engine.execute("SELECT coalesce(MAX(uhrzeit), to_timestamp(0)) FROM messdaten;")][0]
+        print("inserting newer than ", last_inserted)
 
     wid = 4
     messdaten = []
     insert_time = datetime.now()
     for _a, _b, ind, ts, val in arr[1:]:
-        if args.delete or ts > last_timestamp and ind == 6:
-            t = datetime.fromtimestamp(ts)
+        t = pytz.utc.localize(datetime.utcfromtimestamp(ts))
+        if t > last_inserted and ind == 6:
             messdaten.append(Messdaten(wid, t, timedelta(0,60,0), 0, gu, gi, gp, wu, wi, int(val), 30, insert_time))
 
     if args.delete:
