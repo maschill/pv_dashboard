@@ -28,7 +28,7 @@ with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute("""SELECT uhrzeit AT TIME ZONE 'Europe/Berlin', wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4;""")]
+data = [[x,y] for x,y in engine.execute("""SELECT uhrzeit AT TIME ZONE 'Europe/Berlin', wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4 ORDER BY uhrzeit ASC;""")]
 t = [d[0] for d in data]
 p = [max(d[1]/100.0,0) for d in data]
 consumption_y = [0]*(len(t))
@@ -48,7 +48,7 @@ app.layout=html.Div(children=[
                     go.Scatter(
                         x=t,
                         y=p,
-                        fill='tonexty',
+                        fill='tozeroy',
                         name='PV Erzeugung'
                     ),
                 ],
