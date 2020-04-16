@@ -54,14 +54,13 @@ if __name__ == "__main__":
     with open('src/db_config.txt', 'r') as fo:
         connection = fo.read().strip()
         print(connection)
-        
+
     engine = create_engine(connection, echo=True)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     print("created tables")
-    
+
     session = Session(bind=engine)
-    engine.commit() 
     print("created session")
     session.add_all(standorte)
     session.commit()
