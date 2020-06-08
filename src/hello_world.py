@@ -30,38 +30,24 @@ connection = None
 with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
-engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4')]
+# engine = create_engine(connection)
+# data = [[x,y] for x,y in engine.execute('SELECT uhrzeit, wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4')]
+data = [[0,0] for _ in range(25)]
 t = [d[0] for d in data]
 p = [max(d[1]/100.0,0) for d in data]
 consumption_y = [xx for xx in consumption_y] + [0]*(len(p)-24)
 
 app.title = 'Photovoltaik Dashboard'
 app.layout=html.Div(children=[
-        doc.Graph(
-            id='scatter',
-            figure={
-                'data': [
-                    go.Scatter(
-                        x=t,
-                        y=consumption_y,
-                        fill='tozeroy',
-                        name='Verbrauch Beispiel'
-                    ),
-                    go.Scatter(
-                        x=t,
-                        y=p,
-                        fill='tonexty',
-                        name='PV Erzeugung'
-                    ),
-                ],
-                'layout': go.Layout(
-                    title = 'Dummy Verbrauch-Erzeugungs-Plot',
-                    xaxis = {'title': 'Uhrzeit'},
-                    yaxis = {'title': 'kWh', 'range':[0,40]}
+        html.Div([
+            doc.Graph(
+                id = "updated_graph"),
+            doc.Interval(
+                id = 'graph_update',
+                interval = 3600000,
+                n_intervals = 0
                 )
-            }
-        ),
+        ]),
         html.Div(children=[
             dash_table.DataTable(
                 id = "essen",
@@ -69,13 +55,6 @@ app.layout=html.Div(children=[
                 data = [{k:v for k,v in zip(days,food)}]
             )
         ]),
-        doc.Graph(
-            id = "updated_graph"),
-        doc.Interval(
-            id = 'graph_update',
-            interval = 1*150000,
-            n_intervals = 0
-        )
     ])
 
 @app.callback(Output('updated_graph', 'figure'), 
@@ -88,7 +67,7 @@ def update_graph(n):
 
     engine = create_engine(connection)
     query = "SELECT uhrzeit, SUM(wechselstrom_leistung) FROM messdaten WHERE uhrzeit >= TO_TIMESTAMP('" 
-    base_time = datetime.now() - timedelta(2,0,0,0,0,0)
+    base_time = datetime.now() - timedelta(365,0,0,0,0,0)
     query = query + base_time.strftime("%Y-%m-%d %H:%M:%S") + "', 'YYYY-MM-DD HH24:MI:SS') GROUP BY uhrzeit ORDER BY uhrzeit;" 
     print(query)
 
@@ -104,11 +83,26 @@ def update_graph(n):
 
     layout = go.Layout(
         title = 'Selbst Aktualisierender Plot',
-        xaxis = {'title': 'Uhrzeit'},
-        yaxis = {'title': 'kWh', "range":[0,40]}
+        xaxis = {
+            "title":"Zeit",
+            "rangeselector":{
+                "buttons":[
+                    {"count":2, "label":"2 Tage", "step":"day", "stepmode":"backward"},
+                    {"count":7, "label":"7 Tage", "step":"day", "stepmode":"backward"},
+                    {"count":1, "label":"1 Monat", "step":"month", "stepmode":"backward"},
+                    {"count":1, "label":"1 Jahr", "step":"year", "stepmode":"backward"},
+                    {"step":"all"}
+                ]
+            },
+            "rangeslider" : {"visible":True},
+            "type":"date"
+        },
+        yaxis = {'title': 'kWh', "range":[0,40]},
     )
 
+
     return {"data":data , "layout": layout}
+
 
 if __name__=="__main__":
     app.run_server(port=1337, host="0.0.0.0")
