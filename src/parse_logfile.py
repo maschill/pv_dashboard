@@ -15,6 +15,10 @@ from datetime import timedelta
 from datetime import datetime
 from db_schemes import Messdaten
 
+def localize_ts(ts):
+    return pytz.timezone('Europe/Berlin').localize(datetime.utcfromtimestamp(ts))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="parse pv logfiles and write them to db")
     parser.add_argument("filename", metavar="filename", type=str, help="logfile that is parsed")
@@ -43,15 +47,14 @@ if __name__ == '__main__':
     if args.print_only:
         table = []
         for _a, b, ind, ts, val in arr:
-            formatted = datetime.fromtimestamp(ts).isoformat()
             what_b = {
                     12290: 'total',
                     4149: 'peak',
                     4145: 'insulation',
                 }
-            table.append([formatted, what_b.get(b, b), ind, val])
+            table.append([localize_ts(ts), what_b.get(b, b), ind, val])
 
-        print(tabulate(table, ["date/time", "b", "type", "value"], tablefmt="grid"))
+        print(tabulate(table, ["timestamp", "b", "type", "value"], tablefmt="grid"))
         sys.exit(0)
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -60,22 +63,19 @@ if __name__ == '__main__':
 
     engine = create_engine(connection)
 
-    if args.delete:
-        last_inserted = datetime.utcfromtimestamp(0)
-    else:
-        last_inserted = [t[0] for t in engine.execute("SELECT coalesce(MAX(uhrzeit), to_timestamp(0)) FROM messdaten;")][0]
-        print("inserting newer than ", last_inserted)
-
-    wid = 4
-    messdaten = []
-    insert_time = datetime.now()
-    for _a, _b, ind, ts, val in arr[1:]:
-        t = pytz.utc.localize(datetime.utcfromtimestamp(ts))
-        if t > last_inserted and ind == 6:
-            messdaten.append(Messdaten(wid, t, timedelta(0,60,0), 0, gu, gi, gp, wu, wi, int(val), 30, insert_time))
+    last_inserted = [t[0] for t in engine.execute("SELECT coalesce(MAX(uhrzeit), to_timestamp(0)) FROM messdaten;")][0]
+    print("inserting newer than ", last_inserted)
 
     if args.delete:
         engine.execute("DELETE FROM messdaten;")    
+
+    wid = 4
+    messdaten = []
+    insert_time = datetime.now(pytz.timezone('Europe/Berlin'))
+    for _a, _b, ind, ts, val in arr[1:]:
+        t = localize_ts(ts)
+        if t > last_inserted and ind == 6:
+            messdaten.append(Messdaten(wid, t, timedelta(0,60,0), 0, gu, gi, gp, wu, wi, int(val), 30, insert_time))
 
     session = Session(bind=engine)
     print("created session")

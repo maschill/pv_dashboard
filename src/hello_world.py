@@ -28,11 +28,25 @@ with open('src/db_config.txt', 'r') as fo:
     connection = fo.read().strip()
 
 engine = create_engine(connection)
-data = [[x,y] for x,y in engine.execute("""SELECT uhrzeit AT TIME ZONE 'Europe/Berlin', wechselstrom_leistung FROM messdaten WHERE wechselrichter_id=4 ORDER BY uhrzeit ASC;""")]
+query = """
+    SELECT
+        uhrzeit AT TIME ZONE 'Europe/Berlin', SUM(wechselstrom_leistung)
+    FROM
+        messdaten
+    GROUP BY
+        uhrzeit
+    ORDER BY
+        uhrzeit;
+"""
+
+data = [[x,y] for x,y in engine.execute(query)]
 t = [d[0] for d in data]
 p = [max(d[1]/100.0,0) for d in data]
 consumption_y = [0]*(len(t))
 
+print("data:", hex(id(data)))
+
+# TODO <joseff>: kann man da so range slider wie auf https://plotly.com/python/range-slider/ rein basteln? kann kein plotly..
 app.title = 'Photovoltaik Dashboard'
 app.layout=html.Div(children=[
         doc.Graph(
@@ -96,7 +110,6 @@ def update_graph(n):
         ORDER BY
             uhrzeit;
     """
-    print(query)
 
     data = [[x,y] for x,y in engine.execute(query)]
     t = [d[0] for d in data]

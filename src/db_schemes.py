@@ -78,3 +78,6 @@ class Messdaten(Base):
         self.wechselstrom_leistung = wechselstrom_leistung
         self.temperatur_wechselrichter = temperatur_wechselrichter
         self.insert_timestamp = insert_timestamp
+
+    def __repr__(self):
+        return "<Messdaten ({}: {})>".format(self.uhrzeit.isoformat(), self.wechselstrom_leistung)
