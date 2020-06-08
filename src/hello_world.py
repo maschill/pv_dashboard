@@ -49,30 +49,15 @@ print("data:", hex(id(data)))
 # TODO <joseff>: kann man da so range slider wie auf https://plotly.com/python/range-slider/ rein basteln? kann kein plotly..
 app.title = 'Photovoltaik Dashboard'
 app.layout=html.Div(children=[
-        doc.Graph(
-            id='scatter',
-            figure={
-                'data': [
-                    go.Scatter(
-                        x=t,
-                        y=consumption_y,
-                        fill='tozeroy',
-                        name='Verbrauch Beispiel'
-                    ),
-                    go.Scatter(
-                        x=t,
-                        y=p,
-                        fill='tozeroy',
-                        name='PV Erzeugung'
-                    ),
-                ],
-                'layout': go.Layout(
-                    title = 'Dummy Verbrauch-Erzeugungs-Plot',
-                    xaxis = {'title': 'Uhrzeit'},
-                    yaxis = {'title': 'kWh', 'range':[0,40]}
+        html.Div([
+            doc.Graph(
+                id = "updated_graph"),
+            doc.Interval(
+                id = 'graph_update',
+                interval = 3600000,
+                n_intervals = 0
                 )
-            }
-        ),
+        ]),
         html.Div(children=[
             dash_table.DataTable(
                 id = "essen",
@@ -80,13 +65,6 @@ app.layout=html.Div(children=[
                 data = [{k:v for k,v in zip(days,food)}]
             )
         ]),
-        doc.Graph(
-            id = "updated_graph"),
-        doc.Interval(
-            id = 'graph_update',
-            interval = 1*150000,
-            n_intervals = 0
-        )
     ])
 
 @app.callback(Output('updated_graph', 'figure'), 
@@ -123,11 +101,26 @@ def update_graph(n):
 
     layout = go.Layout(
         title = 'Selbst Aktualisierender Plot',
-        xaxis = {'title': 'Uhrzeit'},
-        yaxis = {'title': 'kWh', "range":[0,40]}
+        xaxis = {
+            "title":"Zeit",
+            "rangeselector":{
+                "buttons":[
+                    {"count":2, "label":"2 Tage", "step":"day", "stepmode":"backward"},
+                    {"count":7, "label":"7 Tage", "step":"day", "stepmode":"backward"},
+                    {"count":1, "label":"1 Monat", "step":"month", "stepmode":"backward"},
+                    {"count":1, "label":"1 Jahr", "step":"year", "stepmode":"backward"},
+                    {"step":"all"}
+                ]
+            },
+            "rangeslider" : {"visible":True},
+            "type":"date"
+        },
+        yaxis = {'title': 'kWh', "range":[0,40]},
     )
 
+
     return {"data":data , "layout": layout}
+
 
 if __name__=="__main__":
     app.run_server(port=1337, host="0.0.0.0")
