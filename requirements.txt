@@ -1,5 +1,5 @@
   flask==1.0.2
-  numpy==1.15.2
+  numpy==1.22.0
   dash==0.40
   dash-core-components
   dash-html-components
